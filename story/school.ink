@@ -1,4 +1,4 @@
-// EXAM WEEK - a 5-page school-life adventure.
+// EXAM WEEK - a school-life adventure in 5 scenes.
 // Each page has 3 choices worth 0, 10 or 20 points. The total (0-100)
 // decides which of the 5 exam results you get.
 // `# image: name` tags are hooks for future 2D artwork; the player ignores them for now.
@@ -10,9 +10,9 @@ A school-life adventure in five pages.
 -> page1
 
 === page1 ===
-[ PAGE 1/5 : MONDAY MORNING ] # image: bedroom
+[ MONDAY MORNING ] # image: bedroom
 BRRRING! Your alarm screams at 6:30 AM.
-The big final exam is this Friday, and your bed has never felt warmer.
+Grey light leaks through the curtains and rain taps on the window. The big final exam is this Friday, only four days away, and right now your warm bed feels like the safest place in the world.
 * [Hit snooze. Five more minutes... or fifty.]
     ~ score += 0
     You wake up in a panic at 8:10 and sprint to school with toast in your mouth.
@@ -27,9 +27,9 @@ The big final exam is this Friday, and your bed has never felt warmer.
     -> page2
 
 === page2 ===
-[ PAGE 2/5 : HOMEROOM ] # image: classroom
-Your best friend Kenji slides a thick notebook across the desk.
-"I rewrote all of last term's notes. Want them?"
+[ HOMEROOM ] # image: classroom
+Homeroom is buzzing with nervous chatter about Friday's exam. Your best friend Kenji drops into the seat beside you and slides a thick, colour-coded notebook across the desk.
+"I rewrote all of last term's notes," he says proudly. "Want them?"
 * [Sit with Kenji and compare notes to fill in your gaps.]
     ~ score += 20
     You spot three topics you completely forgot about. Kenji is a hero.
@@ -44,8 +44,8 @@ Your best friend Kenji slides a thick notebook across the desk.
     -> page3
 
 === page3 ===
-[ PAGE 3/5 : LUNCH BREAK ] # image: canteen
-The bell rings. You have forty minutes and three tempting options.
+[ LUNCH BREAK ] # image: canteen
+The lunch bell rings and the corridor floods with students. You have forty minutes to spare. Posters for the games club tournament promise a shiny trophy, the study group is meeting in the science lab, and the quiet rooftop is calling your name.
 * [Join the games club tournament. There's a trophy!]
     ~ score += 0
     You reach the semi-finals. The trophy is shiny. The exam is not impressed.
@@ -60,8 +60,8 @@ The bell rings. You have forty minutes and three tempting options.
     -> page4
 
 === page4 ===
-[ PAGE 4/5 : FREE PERIOD ] # image: library
-A free period! Your classmate Aiko looks stuck on her algebra homework.
+[ FREE PERIOD ] # image: library
+Your last lesson is cancelled, so you have a free period. In the corner of the classroom, your classmate Aiko is frowning at her algebra homework and chewing her pencil. Through the window you can see the library, and the computer lab door is wide open.
 * [Help Aiko work through the algebra problems.]
     ~ score += 10
     Explaining it out loud helps you understand it better too.
@@ -76,8 +76,8 @@ A free period! Your classmate Aiko looks stuck on her algebra homework.
     -> page5
 
 === page5 ===
-[ PAGE 5/5 : THE NIGHT BEFORE ] # image: night
-It's Thursday night. The exam starts at 8:00 AM tomorrow.
+[ THE NIGHT BEFORE ] # image: night
+It's Thursday night. The exam starts at 8:00 AM tomorrow, and your desk is buried under notes, highlighters and empty snack wrappers. Then your phone buzzes with a reminder: the new season of your favourite show has just been released.
 * [Binge the new season of your favourite show.]
     ~ score += 0
     "Just one more episode" turns into nine.
@@ -92,8 +92,8 @@ It's Thursday night. The exam starts at 8:00 AM tomorrow.
     -> results
 
 === results ===
-[ FRIDAY : RESULTS DAY ] # image: results
-The papers are handed back. You turn yours over slowly...
+[ RESULTS DAY ] # image: results
+Friday comes and goes in a blur of pencils and ticking clocks. A week later, the papers come back. The classroom falls silent as Ms. Tan walks between the desks, handing them out face down. You take a deep breath and slowly turn yours over...
 {
     - score <= 10: -> fail_zero
     - score <= 40: -> fail_twenty

@@ -29,7 +29,7 @@ const HELP: Entry[] = [
   "HELP     Show this help",
 ].map((text) => ({ kind: "info", text }));
 
-const END_HINT: Entry = { kind: "info", text: "Type RESTART to play again." };
+const END_HINT: Entry = { kind: "info", text: "Type 1 or RESTART to play again." };
 
 /** Story lines become transcript entries; ink tags pick the style. */
 function toEntries(step: Step): Entry[] {
@@ -43,12 +43,16 @@ function toEntries(step: Step): Entry[] {
 export default function Terminal() {
   const engine = useRef<Engine | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const screenRef = useRef<HTMLDivElement>(null);
+  // True when the transcript was replaced by a new page rather than appended to.
+  const freshScreen = useRef(true);
   const [transcript, setTranscript] = useState<Entry[]>([]);
   const [choices, setChoices] = useState<string[]>([]);
   const [ended, setEnded] = useState(false);
 
+  /** Shows a new page on a clean screen and autosaves it. */
   const show = useCallback((step: Step, entries: Entry[]) => {
+    freshScreen.current = true;
     setTranscript(entries);
     setChoices(step.choices);
     setEnded(step.ended);
@@ -76,10 +80,13 @@ export default function Terminal() {
     start();
   }, [show, start]);
 
-  // Keep the newest output and the prompt in view.
+  // A new page starts at the top; HELP/errors appended to a page scroll into view.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [transcript, choices]);
+    const el = screenRef.current;
+    if (!el) return;
+    el.scrollTop = freshScreen.current ? 0 : el.scrollHeight;
+    freshScreen.current = false;
+  }, [transcript]);
 
   // Focus the prompt on devices with a mouse; on touch screens it would pop the keyboard over the story.
   useEffect(() => {
@@ -87,14 +94,14 @@ export default function Terminal() {
   }, []);
 
   const handle = (input: string) => {
-    const cmd = parseCommand(input, choices.length);
+    const cmd = parseCommand(input, choices.length, ended);
     if (cmd.type === "none" || !engine.current) return;
     const log = [...transcript, { kind: "echo" as const, text: `${PROMPT}${input.trim()}` }];
 
     switch (cmd.type) {
       case "choose": {
         const step = engine.current.choose(cmd.index);
-        show(step, [...log, ...toEntries(step)]);
+        show(step, toEntries(step));
         break;
       }
       case "restart":
@@ -117,7 +124,7 @@ export default function Terminal() {
     <main className="crt mx-auto flex h-dvh max-w-3xl flex-col text-xl leading-snug sm:text-2xl">
       <header className="shrink-0 bg-dos-fg px-2 text-center text-dos-bg">EXAM WEEK.EXE</header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 pt-2 break-words">
+      <div ref={screenRef} className="min-h-0 flex-1 overflow-y-auto px-3 pt-2 pb-4 break-words">
         <div role="log" aria-live="polite">
           {transcript.map((entry, i) => (
             <p key={i} className={`whitespace-pre-wrap ${KIND_STYLE[entry.kind]}`}>
@@ -126,11 +133,10 @@ export default function Terminal() {
           ))}
         </div>
         {ended ? (
-          <ChoiceList choices={["RESTART"]} onPick={() => handle("RESTART")} />
+          <ChoiceList key="restart" choices={["RESTART"]} onPick={handle} />
         ) : (
-          <ChoiceList choices={choices} onPick={handle} />
+          <ChoiceList key={choices.join("|")} choices={choices} onPick={handle} />
         )}
-        <div ref={bottomRef} />
       </div>
 
       <div className="shrink-0 border-t border-dos-fg/30 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">

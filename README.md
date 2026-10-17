@@ -22,7 +22,7 @@ A choose-your-own-adventure game that runs in the browser and looks like an old 
 
 ## Commands at the prompt
 
-`1`, `2`, `3`… pick a choice · `HELP` · `CLS` clears the screen · `RESTART`
+`1`, `2`, `3`… pick a choice (at an ending, `1` restarts) · `HELP` · `CLS` clears the screen · `RESTART`
 
 ## Deploying to Vercel (free tier)
 

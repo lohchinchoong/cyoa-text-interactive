@@ -29,10 +29,10 @@ function play(pointsPerPage: number[]) {
 describe("engine", () => {
   it("starts on page 1 with three choices", () => {
     const step = createEngine(storyJson).continue();
-    expect(text(step)).toContain("PAGE 1/5");
+    expect(text(step)).toContain("MONDAY MORNING");
     expect(step.choices).toHaveLength(3);
     expect(step.ended).toBe(false);
-    expect(step.lines.find((l) => l.text.includes("PAGE 1/5"))?.tags).toEqual([
+    expect(step.lines.find((l) => l.text.includes("MONDAY MORNING"))?.tags).toEqual([
       "image: bedroom",
     ]);
   });

@@ -8,13 +8,17 @@ export type Command =
 
 const KEYWORDS = { RESTART: "restart", HELP: "help", CLS: "cls" } as const;
 
-/** Turns what the player typed at the prompt into a game command. */
-export function parseCommand(input: string, choiceCount: number): Command {
+/**
+ * Turns what the player typed at the prompt into a game command.
+ * Once the story has ended, the only option shown is `[1] RESTART`, so "1" restarts.
+ */
+export function parseCommand(input: string, choiceCount: number, ended = false): Command {
   const raw = input.trim();
   if (!raw) return { type: "none" };
 
   if (/^\d+$/.test(raw)) {
     const n = Number(raw);
+    if (ended) return n === 1 ? { type: "restart" } : { type: "error", msg: "Invalid choice" };
     return n >= 1 && n <= choiceCount
       ? { type: "choose", index: n - 1 }
       : { type: "error", msg: "Invalid choice" };
