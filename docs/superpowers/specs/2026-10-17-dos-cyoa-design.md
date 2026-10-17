@@ -1,7 +1,7 @@
 # DOS-style choose-your-own-adventure (Next.js + Ink): spec and build plan
 
 ## Context
-The project folder `/Users/desmondloh/Projects/cyoa-text-interactive` is empty. The user wants a choose-your-own-adventure game that runs in the browser, styled like an old DOS text game and playable on mobile. Requirements:
+The project folder is empty. The user wants a choose-your-own-adventure game that runs in the browser, styled like an old DOS text game and playable on mobile. Requirements:
 - Stack: Next.js, TypeScript, Tailwind (monospace) and Ink/inkjs, deployed to Vercel's free tier with no unnecessary bloat.
 - 2D anime-style graphics may come later, so leave a hook for them but build none of it now.
 - Choices can be typed at a `C:\SCHOOL>` prompt, or tapped/clicked.
