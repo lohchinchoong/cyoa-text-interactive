@@ -1,6 +1,13 @@
-# Exam Week: a DOS-style text adventure
+# School.exe: DOS-style text adventures
 
-A choose-your-own-adventure game that runs in the browser and looks like an old DOS game. It's built with Next.js, TypeScript, Tailwind CSS and [Ink](https://www.inklestudios.com/ink/)/inkjs. Players can type a choice number at the `C:\SCHOOL>` prompt or tap a choice. Progress autosaves in the browser.
+A choose-your-own-adventure game that runs in the browser and looks like an old DOS game. It's built with Next.js, TypeScript, Tailwind CSS and [Ink](https://www.inklestudios.com/ink/)/inkjs. Players pick an adventure from the menu, then type a choice number at the `C:\SCHOOL>` prompt or tap a choice. Progress autosaves in the browser.
+
+## Adventures
+
+- **PRIMARY SCHOOL** (`story/primary.ink`): exam week in 5 pages, with 5 results.
+- **SECONDARY SCHOOL** (`story/secondary.ink`): Sec 1 to Sec 4 in 40 pages, with 7 endings. Hidden counters (grades, discipline strikes, the secret society and the startup) can end a run early: you can be expelled, repeat a year, vanish into the Order of the Clock Tower, or drop out and become a billionaire.
+
+To add an adventure, write `story/<id>.ink` and register it in `src/story/adventures.ts`.
 
 ## Scripts
 
@@ -13,16 +20,17 @@ A choose-your-own-adventure game that runs in the browser and looks like an old 
 
 ## Writing the story
 
-- The story lives in `story/school.ink`. It's plain [Ink](https://github.com/inkle/ink/blob/master/Documentation/WritingWithInk.md).
+- Stories live in `story/*.ink`. They're plain [Ink](https://github.com/inkle/ink/blob/master/Documentation/WritingWithInk.md).
 - Choice text goes in `[brackets]` so it isn't repeated after the player picks it. The prompt shows what they picked instead.
 - `# image: name` tags mark scenes for future 2D artwork. The engine collects them, and right now they only style page headings.
-- `# ending: n` tags style the result line.
+- `# ending: name` tags style the result line.
+- In SECONDARY SCHOOL, each page's heading carries a `# page: n` tag. The tests use it to check that every page has at least 30 words and exactly 3 choices.
 - Don't start a line with `-`, because Ink treats it as a gather.
 - If a story change would break existing saves, bump `STORY_VERSION` in `src/story/version.ts`. Old saves are then discarded.
 
 ## Commands at the prompt
 
-`1`, `2`, `3`… pick a choice (at an ending, `1` restarts) · `HELP` · `CLS` clears the screen · `RESTART`
+`1`, `2`, `3`… pick a choice (at an ending, `1` restarts and `2` returns to the menu) · `MENU` · `HELP` · `CLS` clears the screen · `RESTART`
 
 ## Deploying to Vercel (free tier)
 
@@ -36,5 +44,6 @@ story/              Ink source
 scripts/            compile-ink.mjs (build-time Ink compiler)
 src/lib/            engine (inkjs wrapper), commands (prompt parser), persistence (autosave)
 src/components/     Terminal, ChoiceList, Prompt
+src/story/          adventures.ts (menu registry), version.ts
 src/app/            Next.js layout, page, global styles
 ```

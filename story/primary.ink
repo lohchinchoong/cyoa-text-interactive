@@ -1,12 +1,12 @@
-// EXAM WEEK - a school-life adventure in 5 scenes.
+// PRIMARY SCHOOL - exam week, a school-life adventure in 5 scenes.
 // Each page has 3 choices worth 0, 10 or 20 points. The total (0-100)
 // decides which of the 5 exam results you get.
 // `# image: name` tags are hooks for future 2D artwork; the player ignores them for now.
 
 VAR score = 0
 
-EXAM WEEK
-A school-life adventure in five pages.
+PRIMARY SCHOOL
+Exam week: a school-life adventure in five pages.
 -> page1
 
 === page1 ===

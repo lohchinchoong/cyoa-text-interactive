@@ -17,6 +17,7 @@ describe("parseCommand", () => {
     expect(parseCommand("restart", 3)).toEqual({ type: "restart" });
     expect(parseCommand("HELP", 3)).toEqual({ type: "help" });
     expect(parseCommand(" Cls ", 3)).toEqual({ type: "cls" });
+    expect(parseCommand("Menu", 3)).toEqual({ type: "menu" });
   });
 
   it("ignores blank input", () => {
@@ -31,9 +32,10 @@ describe("parseCommand", () => {
     expect(parseCommand("1.5", 3).type).toBe("error");
   });
 
-  it("treats 1 as RESTART once the story has ended", () => {
+  it("treats 1 as RESTART and 2 as MENU once the story has ended", () => {
     expect(parseCommand("1", 0, true)).toEqual({ type: "restart" });
-    expect(parseCommand("2", 0, true)).toEqual({ type: "error", msg: "Invalid choice" });
+    expect(parseCommand("2", 0, true)).toEqual({ type: "menu" });
+    expect(parseCommand("3", 0, true)).toEqual({ type: "error", msg: "Invalid choice" });
     expect(parseCommand("restart", 0, true)).toEqual({ type: "restart" });
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import storyJson from "@/story/school.json";
+import { ADVENTURES, type Adventure } from "@/story/adventures";
 import { STORY_VERSION } from "@/story/version";
 import { parseCommand } from "@/lib/commands";
 import { createEngine, type Engine, type Step } from "@/lib/engine";
@@ -11,7 +11,7 @@ import Prompt, { PROMPT } from "./Prompt";
 
 type Kind = "text" | "heading" | "ending" | "echo" | "error" | "info";
 type Entry = { kind: Kind; text: string };
-type Save = { inkState: string; transcript: Entry[] };
+type Save = { adventureId: string; inkState: string; transcript: Entry[] };
 
 const KIND_STYLE: Record<Kind, string> = {
   text: "",
@@ -25,11 +25,17 @@ const KIND_STYLE: Record<Kind, string> = {
 const HELP: Entry[] = [
   "Type the number of a choice and press Enter, or tap a choice.",
   "RESTART  Start the story again",
+  "MENU     Return to the adventure menu",
   "CLS      Clear the screen",
   "HELP     Show this help",
 ].map((text) => ({ kind: "info", text }));
 
-const END_HINT: Entry = { kind: "info", text: "Type 1 or RESTART to play again." };
+const END_HINT: Entry = { kind: "info", text: "Type 1 to play again or 2 for the menu." };
+
+const MENU_SCREEN: Entry[] = [
+  { kind: "heading", text: "SELECT AN ADVENTURE" },
+  { kind: "info", text: "Type a number and press Enter, or tap an adventure." },
+];
 
 /** Story lines become transcript entries; ink tags pick the style. */
 function toEntries(step: Step): Entry[] {
@@ -42,6 +48,8 @@ function toEntries(step: Step): Entry[] {
 
 export default function Terminal() {
   const engine = useRef<Engine | null>(null);
+  // null while the menu is showing.
+  const [adventure, setAdventure] = useState<Adventure | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
   // True when the transcript was replaced by a new page rather than appended to.
@@ -51,34 +59,51 @@ export default function Terminal() {
   const [ended, setEnded] = useState(false);
 
   /** Shows a new page on a clean screen and autosaves it. */
-  const show = useCallback((step: Step, entries: Entry[]) => {
+  const show = useCallback((adv: Adventure, step: Step, entries: Entry[]) => {
     freshScreen.current = true;
+    setAdventure(adv);
     setTranscript(entries);
     setChoices(step.choices);
     setEnded(step.ended);
-    writeSave(STORY_VERSION, { inkState: engine.current!.saveState(), transcript: entries } satisfies Save);
+    writeSave(STORY_VERSION, {
+      adventureId: adv.id,
+      inkState: engine.current!.saveState(),
+      transcript: entries,
+    } satisfies Save);
   }, []);
 
-  const start = useCallback(() => {
-    engine.current = createEngine(storyJson);
-    const step = engine.current.continue();
-    show(step, toEntries(step));
-  }, [show]);
+  const start = useCallback(
+    (adv: Adventure) => {
+      engine.current = createEngine(adv.json);
+      const step = engine.current.continue();
+      show(adv, step, toEntries(step));
+    },
+    [show],
+  );
 
-  // Resume the autosave, or start fresh. Runs client-side only (localStorage).
+  const showMenu = useCallback(() => {
+    clearSave();
+    engine.current = null;
+    freshScreen.current = true;
+    setAdventure(null);
+    setTranscript(MENU_SCREEN);
+    setChoices(ADVENTURES.map((a) => a.title));
+    setEnded(false);
+  }, []);
+
+  // Resume the autosave, or show the menu. Runs client-side only (localStorage).
   useEffect(() => {
     const save = loadSave<Save>(STORY_VERSION);
-    if (save) {
+    const adv = ADVENTURES.find((a) => a.id === save?.adventureId);
+    if (save && adv) {
       try {
-        engine.current = createEngine(storyJson, save.inkState);
-        show(engine.current.continue(), save.transcript);
+        engine.current = createEngine(adv.json, save.inkState);
+        show(adv, engine.current.continue(), save.transcript);
         return;
-      } catch {
-        clearSave();
-      }
+      } catch {}
     }
-    start();
-  }, [show, start]);
+    showMenu();
+  }, [show, showMenu]);
 
   // A new page starts at the top; HELP/errors appended to a page scroll into view.
   useEffect(() => {
@@ -95,18 +120,25 @@ export default function Terminal() {
 
   const handle = (input: string) => {
     const cmd = parseCommand(input, choices.length, ended);
-    if (cmd.type === "none" || !engine.current) return;
+    if (cmd.type === "none") return;
     const log = [...transcript, { kind: "echo" as const, text: `${PROMPT}${input.trim()}` }];
 
     switch (cmd.type) {
       case "choose": {
+        if (!adventure || !engine.current) {
+          start(ADVENTURES[cmd.index]);
+          break;
+        }
         const step = engine.current.choose(cmd.index);
-        show(step, toEntries(step));
+        show(adventure, step, toEntries(step));
         break;
       }
       case "restart":
-        clearSave();
-        start();
+        if (adventure) start(adventure);
+        else showMenu();
+        break;
+      case "menu":
+        showMenu();
         break;
       case "cls":
         setTranscript([]);
@@ -122,7 +154,7 @@ export default function Terminal() {
 
   return (
     <main className="crt mx-auto flex h-dvh max-w-3xl flex-col text-xl leading-snug sm:text-2xl">
-      <header className="shrink-0 bg-dos-fg px-2 text-center text-dos-bg">EXAM WEEK.EXE</header>
+      <header className="shrink-0 bg-dos-fg px-2 text-center text-dos-bg">{adventure?.header ?? "SCHOOL.EXE"}</header>
 
       <div ref={screenRef} className="min-h-0 flex-1 overflow-y-auto px-3 pt-2 pb-4 break-words">
         <div role="log" aria-live="polite">
@@ -133,7 +165,7 @@ export default function Terminal() {
           ))}
         </div>
         {ended ? (
-          <ChoiceList key="restart" choices={["RESTART"]} onPick={handle} />
+          <ChoiceList key="end" choices={["RESTART", "MENU"]} onPick={handle} />
         ) : (
           <ChoiceList key={choices.join("|")} choices={choices} onPick={handle} />
         )}

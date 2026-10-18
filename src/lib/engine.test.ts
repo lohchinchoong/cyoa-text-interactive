@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import storyJson from "../story/school.json";
+import storyJson from "../story/primary.json";
 import { createEngine, type Step } from "./engine";
 
 const text = (s: Step) => s.lines.map((l) => l.text).join("\n");
 
 // Choice index (0-based) on each page that is worth 0, 10 and 20 points.
-// Must match story/school.ink.
+// Must match story/primary.ink.
 const POINTS: Record<number, number>[] = [
   { 0: 0, 10: 2, 20: 1 },
   { 0: 2, 10: 1, 20: 0 },
@@ -29,6 +29,7 @@ function play(pointsPerPage: number[]) {
 describe("engine", () => {
   it("starts on page 1 with three choices", () => {
     const step = createEngine(storyJson).continue();
+    expect(text(step)).toContain("PRIMARY SCHOOL");
     expect(text(step)).toContain("MONDAY MORNING");
     expect(step.choices).toHaveLength(3);
     expect(step.ended).toBe(false);

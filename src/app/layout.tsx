@@ -9,7 +9,7 @@ const dosFont = VT323({
 });
 
 export const metadata: Metadata = {
-  title: "Exam Week",
+  title: "School.exe",
   description: "A DOS-style choose-your-own-adventure about school life.",
 };
 
